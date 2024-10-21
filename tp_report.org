@@ -1,0 +1,12 @@
+#+Title:  Motion Estimation TP - TVID
+#+author: Ghislain Bonnard
+
+* Motion Estimation
+
+** Pixel-wise approach
+
+** Blocks approach
+
+** Deductions
+
+** Regularization method

@@ -45,7 +45,7 @@
 (defvar +ray+ 5)
 
 ;; Considering
-(defun motion-vector (F1 F2)
+(defun pixel-wise-motion-vector (F1 F2)
   ;; Imago macro to iterate over all image pixels
   (imago:do-image-pixels (F1 color x y)
     (let ((h 0) (s 0) (l 0))
@@ -94,4 +94,4 @@
     l_found
     l_saved))
 
-(motion-vector F1 F2)
+(pixel-wise-motion-vector F1 F2)

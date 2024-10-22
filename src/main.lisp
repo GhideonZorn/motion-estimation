@@ -6,6 +6,11 @@
 ;; See: https://github.com/tokenrove/imago
 (ql:quickload "imago")
 
+;; Using py4cl to use matplotlib and quiver to print obtained
+;; vectors
+(ql:quickload :py4cl)
+(setf py4cl:*python-command* "python3")
+
 ;; FIXME: some variables used for testing, frame and resources
 ;; path will be given as input to program
 (defvar data-path "../data/")
@@ -95,3 +100,11 @@
     l_saved))
 
 (pixel-wise-motion-vector F1 F2)
+
+(py4cl:import-module "numpy" :as "np")
+(py4cl:import-module "matplotlib.pyplot" :as "plt")
+
+(plt:subplots :figsize '(10 10))
+(defvar v '(5 5))
+(plt:quiver 0 0 (first v) (second v))
+(plt:show)

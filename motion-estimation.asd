@@ -2,7 +2,8 @@
   :version "0.0.1"
   :author "Ghislain Bonnard"
   :license ""
-  :depends-on (:imago)
+  :depends-on (:imago
+               :py4cl)
   :components ((:module "src"
                 :components
                 ((:file "main"))))

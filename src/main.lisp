@@ -27,7 +27,6 @@
 (defun L (max min)
   (/ (+ max min) 2))
 
-;; TODO: use values to reduce function size and lisibility
 (defun rgb-to-hsl (rgb)
   (let*
       ((r (/ (imago:color-red rgb) 255))
@@ -35,15 +34,12 @@
        (b (/ (imago:color-blue rgb) 255))
        (min (min r g b))
        (max (max r g b))
-       (l (L max min))
-       (h (H max r g b (- max min)))
-       (s (S (- max min) l)))
-    (setq h )
-
-    (setq l (* 100 l))
-    (setq s (* 100 s))
-  ))
+       (l (L max min)))
+    (values (H max r g b (- max min))
+            (* 100 (S (- max min) l))
+            (* 100 l))))
 
 ;; Imago macro to iterate over all image pixels
 (imago:do-image-pixels (F1 color x y)
-  (rgb-to-hsl color))
+  (let ((h 0) (s 0) (l 0))
+    (setf (values h s l) (rgb-to-hsl color))))

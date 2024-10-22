@@ -5,7 +5,10 @@
   :depends-on (:imago)
   :components ((:module "src"
                 :components
-                ((:file "main"))))
+                ((:file "main")
+                 (:file "pixel-wise")
+                 (:file "bma")
+                 (:file "hsl"))))
   :description "TVID TP1 implementation"
   :in-order-to ((test-op (test-op "motion-estimation/tests"))))
 

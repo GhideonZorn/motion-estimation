@@ -69,23 +69,33 @@
 ;; to l in the ray of size +ray+ and return the
 ;; vector between the two pixels
 (defun get-pixel-new-pos(F2 x y l)
-    (cond ((or (< x +ray+) (>= x (- (imago:image-width F2) +ray+))) '(0 0))
-          ((or (< y +ray+) (>= y (- (imago:image-height F2) +ray+))) '(0 0))
-          (t (iter-over-area F2 x y l))))
+  (cond ((or (< x +ray+) (>= x (- (imago:image-width F2) +ray+))) '(0 0))
+        ((or (< y +ray+) (>= y (- (imago:image-height F2) +ray+))) '(0 0))
+        (t (iter-over-area F2 x y l))))
+
+;; FIXME: Find a better way to handling first call than
+;; to return a big value when encountering -1
+(defun distance (x1 y1 x2 y2)
+  (if (= x2 -1)
+      10000
+      (+ (abs (- x1 x2)) (abs (- y1 y2)))))
 
 (defun iter-over-area (F2 x y l)
   (let ((l_saved 0)
         (l_temp 0)
-        (new_x x)
-        (new_y y))
+        (new_x -1)
+        (new_y -1))
     (dotimes (i (+ (* +ray+ 2) 1))
       (dotimes (j (+ (* +ray+ 2) 1))
         (setf l_temp (check-pixel-at-pos F2 l l_saved
                         (- (+ x i) 5) (- (+ y j) 5)))
-        (when (/= l_temp l_saved)
+        (when (or (/= l_temp l_saved)
+                   (< (distance x y (- (+ x i) 5) (- (+ y j) 5))
+                      (distance x y new_x new_y)))
             (setf l_saved l_temp)
             (setf new_x (- (+ x i) 5))
-            (setf new_y (- (+ y j) 5)))))
+            (setf new_y (- (+ y j) 5))
+            )))
     (vector-between x y new_x new_y)))
 
 ;; Get the luminosity at x y of frame F2 and compare
@@ -105,7 +115,6 @@
 
 (defparameter u ())
 (defparameter v ())
-
 (setf (values u v) (pixel-wise-motion-vector F1 F2))
 
 ;; Reduce by keeping element every index + spacing

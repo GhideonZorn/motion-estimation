@@ -6,6 +6,11 @@
 ;; See: https://github.com/tokenrove/imago
 (ql:quickload "imago")
 
+;; Using py4cl to use matplotlib and quiver to print obtained
+;; vectors
+(ql:quickload :py4cl)
+(setf py4cl:*python-command* "python3")
+
 ;; FIXME: some variables used for testing, frame and resources
 ;; path will be given as input to program
 (defvar data-path "../data/")
@@ -46,11 +51,15 @@
 
 ;; Considering
 (defun pixel-wise-motion-vector (F1 F2)
+  (let ((u nil) (v nil) (tmp nil))
   ;; Imago macro to iterate over all image pixels
-  (imago:do-image-pixels (F1 color x y)
-    (let ((h 0) (s 0) (l 0))
-      (setf (values h s l) (rgb-to-hsl color))
-      (get-pixel-new-pos F2 x y l))))
+    (imago:do-image-pixels (F1 color x y)
+      (let ((h 0) (s 0) (l 0))
+        (setf (values h s l) (rgb-to-hsl color))
+        (setf tmp (get-pixel-new-pos F2 x y l))
+        (setf u (cons (first tmp) u))
+        (setf v (cons (second tmp) v))))
+    (values (reverse u) (reverse v))))
 
 ;; Return the vector going from
 (defun vector-between (x1 y1 x2 y2)
@@ -60,9 +69,9 @@
 ;; to l in the ray of size +ray+ and return the
 ;; vector between the two pixels
 (defun get-pixel-new-pos(F2 x y l)
-  (cond ((or (< x +ray+) (>= x (- (imago:image-width F2) +ray+))) l)
-        ((or (< y +ray+) (>= y (- (imago:image-height F2) +ray+))) l)
-        (t (iter-over-area F2 x y l))))
+    (cond ((or (< x +ray+) (>= x (- (imago:image-width F2) +ray+))) '(0 0))
+          ((or (< y +ray+) (>= y (- (imago:image-height F2) +ray+))) '(0 0))
+          (t (iter-over-area F2 x y l))))
 
 (defun iter-over-area (F2 x y l)
   (let ((l_saved 0)
@@ -94,4 +103,47 @@
     l_found
     l_saved))
 
-(pixel-wise-motion-vector F1 F2)
+(defparameter u ())
+(defparameter v ())
+
+(setf (values u v) (pixel-wise-motion-vector F1 F2))
+
+;; Reduce by keeping element every index + spacing
+(defun reduce-by-spacing (list spacing)
+  (mapcar #'(lambda (pair) (car pair))
+      (remove-if #'(lambda (pair) (if (eq (mod (cdr pair) spacing ) 0) nil t))
+          (mapcar #'(lambda (elm idx) (cons elm idx))
+              list (loop for i from 0 to (length list) collect i)))))
+
+(defun skip-zeros (list)
+  (remove-if #'(lambda (elm) (eq elm 0)) list))
+
+(py4cl:import-module "numpy" :as "np")
+(py4cl:import-module "matplotlib.pyplot" :as "plt")
+
+(plt:subplots :figsize '(10 10))
+
+(defparameter +spacing+ 10)
+
+(setf u (reduce-by-spacing u +spacing+))
+(setf v (reduce-by-spacing v +spacing+))
+
+;; Produce array of points for quiver
+(let ((x (np:arange 0 (imago:image-width F1))) (y (np:arange 0 (imago:image-height F1)))
+      (bigx nil) (bigy nil) (tmp nil))
+  (setf tmp (np:meshgrid x y))
+  (setf bigx (aref tmp 0))
+  (setf bigy (aref tmp 1))
+  (let ((i_x (np:arange 0 (np:size bigx) +spacing+)) (i_y (np:arange 0 (np:size bigy) +spacing+)))
+    (setf i_x (np:clip i_x 0 (- (np:size bigx) 1)))
+    (setf i_y (np:clip i_y 0 (- (np:size bigy) 1)))
+    (setf bigx (py4cl:python-call "np.ndarray.flatten" bigx))
+    (setf bigy (py4cl:python-call "np.ndarray.flatten" bigy))
+    (setf bigx (np:take bigx i_x))
+    (setf bigy (np:take bigy i_y))
+    (plt:quiver bigx bigy u v :color "r" :angles "xy" :scale 1 :scale_units "xy" :linewidth 0.5)
+    ))
+
+(plt:xlim 0 (imago:image-width F1))
+(plt:ylim (imago:image-height F1) 0)
+(plt:show)

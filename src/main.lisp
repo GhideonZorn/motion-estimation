@@ -118,11 +118,13 @@
 (setf (values u v) (pixel-wise-motion-vector F1 F2))
 
 ;; Reduce by keeping element every index + spacing
-(defun reduce-by-spacing (list spacing)
+(defun reduce-by-spacing (list spacing width)
   (mapcar #'(lambda (pair) (car pair))
-      (remove-if #'(lambda (pair) (if (eq (mod (cdr pair) spacing ) 0) nil t))
-          (mapcar #'(lambda (elm idx) (cons elm idx))
-              list (loop for i from 0 to (length list) collect i)))))
+      (remove-if #'(lambda (pair)
+                     (if (and (eq (mod (cdr pair) spacing) 0)
+                              (eq (mod (floor (cdr pair) width) spacing) 0)) nil t))
+          (mapcar #'(lambda (elm idx) (cons elm idx)) list
+              (loop for i from 0 to (length list) collect i)))))
 
 (defun skip-zeros (list)
   (remove-if #'(lambda (elm) (eq elm 0)) list))
@@ -132,10 +134,10 @@
 
 (plt:subplots :figsize '(10 10))
 
-(defparameter +spacing+ 10)
+(defparameter +spacing+ 5)
 
-(setf u (reduce-by-spacing u +spacing+))
-(setf v (reduce-by-spacing v +spacing+))
+(setf u (reduce-by-spacing u +spacing+ (imago:image-width F1)))
+(setf v (reduce-by-spacing v +spacing+ (imago:image-width F1)))
 
 ;; Produce array of points for quiver
 (let ((x (np:arange 0 (imago:image-width F1))) (y (np:arange 0 (imago:image-height F1)))
@@ -143,13 +145,16 @@
   (setf tmp (np:meshgrid x y))
   (setf bigx (aref tmp 0))
   (setf bigy (aref tmp 1))
-  (let ((i_x (np:arange 0 (np:size bigx) +spacing+)) (i_y (np:arange 0 (np:size bigy) +spacing+)))
+  (let ((i_x (np:arange 0 (floor (np:size bigx) +spacing+) +spacing+))
+        (i_y (np:arange 0 (imago:image-height F1) +spacing+)))
+    (setf i_y (np:clip i_y 0 (- (imago:image-height F1) 1)))
+    (setf bigx (np:take bigx i_y 0))
+    (setf bigy (np:take bigy i_y 0))
     (setf i_x (np:clip i_x 0 (- (np:size bigx) 1)))
-    (setf i_y (np:clip i_y 0 (- (np:size bigy) 1)))
     (setf bigx (py4cl:python-call "np.ndarray.flatten" bigx))
     (setf bigy (py4cl:python-call "np.ndarray.flatten" bigy))
     (setf bigx (np:take bigx i_x))
-    (setf bigy (np:take bigy i_y))
+    (setf bigy (np:take bigy i_x))
     (plt:quiver bigx bigy u v :color "r" :angles "xy" :scale 1 :scale_units "xy" :linewidth 0.5)
     ))
 

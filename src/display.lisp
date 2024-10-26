@@ -23,14 +23,14 @@
           (mapcar #'(lambda (elm idx) (cons elm idx)) list
               (loop for i from 0 to (length list) collect i)))))
 
-(defun get-points-arrays (spacing width height)
+(defun get-points-arrays (spacing width height start)
   (let ((x (np:arange 0 width)) (y (np:arange 0 height))
         (bigx nil) (bigy nil) (tmp nil))
     (setf tmp (np:meshgrid x y))
     (setf bigx (aref tmp 0))
     (setf bigy (aref tmp 1))
-    (let ((i_x (np:arange 0 (floor (np:size bigx) spacing) spacing))
-        (i_y (np:arange 0 height spacing)))
+    (let ((i_x (np:arange start (floor (np:size bigx) spacing) spacing))
+        (i_y (np:arange start height spacing)))
     (setf i_y (np:clip i_y 0 (- height 1)))
     (setf bigx (np:take bigx i_y 0))
     (setf bigy (np:take bigy i_y 0))
@@ -39,8 +39,7 @@
     (setf bigy (py4cl:python-call "np.ndarray.flatten" bigy))
     (setf bigx (np:take bigx i_x))
     (setf bigy (np:take bigy i_x)))
-    (values bigx bigy)
-  ))
+    (values bigx bigy)))
 
 (defun display (u v spacing width height)
   (setf u (reduce-by-spacing u spacing width))
@@ -52,6 +51,14 @@
     (print (np:size y))
     (plt:quiver x y u v :color "r" :angles "xy" :scale 1
                               :scale_units "xy" :linewidth 0.5))
+  (plt:xlim 0 width)
+  (plt:ylim height 0)
+  (plt:show))
+
+(defun display-block (u v x y width height)
+  (plt:subplots :figsize '(10 10))
+  (plt:quiver x y u v :color "r" :angles "xy" :scale 1
+                      :scale_units "xy" :linewidth 0.5)
   (plt:xlim 0 width)
   (plt:ylim height 0)
   (plt:show))

@@ -1,4 +1,4 @@
-#+Title:  Motion Estimation TP - TVID
+#+Title:  TP 1 - TVID
 #+author: Ghislain Bonnard
 
 * Motion Estimation

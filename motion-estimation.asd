@@ -11,7 +11,7 @@
                  (:file "bma")
                  (:file "hsl")
                  (:file "display"))))
-  :description "TVID TP1 implementation"
+  :description "TVID TP's implementation"
   :in-order-to ((test-op (test-op "motion-estimation/tests"))))
 
 (defsystem "motion-estimation/tests"
@@ -22,5 +22,5 @@
   :components ((:module "tests"
                 :components
                 ((:file "main"))))
-  :description "Test system for motion-estimation TP"
+  :description "Test system for motion-estimation TP's"
   :perform (test-op (op c) (symbol-call :rove :run c)))

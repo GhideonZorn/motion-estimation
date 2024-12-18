@@ -1,0 +1,24 @@
+#+title: TP 2 - TVID
+#+author: Ghislain Bonnard
+
+* Movement compensation and video compression
+
+** Implementation choice and common lisp optimization
+
+As the first TP, this TP was implemented using common-lisp. The README.md was updated and give more details to use the provided code. The code is also now containing more comments to explain how it works.
+
+Before starting the TP2, I work on a first issue : TP1 computation is way too slow. I work on addressing this issue and benwark my results. The results and solutions are bellow, you can check them or pass to the next part concerning TP2 answers and results.
+
+** (A) Backward estimation
+
+** (B) Justifying backward estimation
+
+** (C) F2 reconstruction
+
+** (D)
+
+** (E)
+
+** (F)
+
+** (G)

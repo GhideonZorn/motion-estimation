@@ -4,10 +4,6 @@
 
 (load "hsl.lisp")
 
-;; A block is representend by a center, and a size
-(defvar +block-size+ 5)
-(defvar +block-search-ray+ 10)
-
 (defun luminosity (F x y)
   (let ((h 0) (s 0) (l 0))
     (setf (values h s l) (rgb-to-hsl (imago:image-pixel F x y)))

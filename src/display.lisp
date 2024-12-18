@@ -23,14 +23,14 @@
           (mapcar #'(lambda (elm idx) (cons elm idx)) list
               (loop for i from 0 to (length list) collect i)))))
 
-(defun get-points-arrays (spacing width height start)
+(defun get-points-arrays (spacing width height)
   (let ((x (np:arange 0 width)) (y (np:arange 0 height))
         (bigx nil) (bigy nil) (tmp nil))
     (setf tmp (np:meshgrid x y))
     (setf bigx (aref tmp 0))
     (setf bigy (aref tmp 1))
-    (let ((i_x (np:arange start (floor (np:size bigx) spacing) spacing))
-        (i_y (np:arange start height spacing)))
+    (let ((i_x (np:arange 0 (floor (np:size bigx) spacing) spacing))
+        (i_y (np:arange 0 height spacing)))
     (setf i_y (np:clip i_y 0 (- height 1)))
     (setf bigx (np:take bigx i_y 0))
     (setf bigy (np:take bigy i_y 0))

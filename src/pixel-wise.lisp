@@ -21,7 +21,7 @@
 
 ;; Return the vector going from
 (defun vector-between (x1 y1 x2 y2)
-  (list (- x1 x2) (- y1 y2)))
+  (list (- x2 x1) (- y2 y1)))
 
 ;; Search for a pixel with the nearest luminosity
 ;; to l in the ray of size +ray+ and return the

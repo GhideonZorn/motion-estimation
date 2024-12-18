@@ -3,10 +3,87 @@
 
 * Motion Estimation
 
+** Implementation choice
+
+This TP was implemented using common-lisp. Details about how to use the work submitted are provided in the README.md. To use quiver and plot the vectors I added the library py4cl which is allowing to call python functions in common-lisp.
+The choice to do it in lisp was made to learn a bit more on the language and force myself to think in new ways.
+
+Disclamer: I am aware that the actual computation time is slow. I initially wanted to work on optimization using lisp features like the optimize and type functions, and use better structures than list (like arrays) as in Didier Vernat's paper "How to make Lisp go faster than C".
+
 ** Pixel-wise approach
+
+As asked, the vectors were calculated using the constant intensity assumption. Some spacing was add to have a better visualization using quiver.
+Here is an example with little movement between two frames (LF000 and LF0010).
+
+#+BEGIN_CENTER
+#+ATTR_LaTeX: :height 0.2\textwidth :center
+[[./data/LF000.jpg]]
+#+ATTR_LaTeX: :height 0.2\textwidth :center
+[[./data/LF001.jpg]]
+#+END_CENTER
+
+#+BEGIN_center
+#+ATTR_LaTeX: :height 0.5\textwidth :center
+[[./results/F0_to_F1_pixelwise.png]]
+#+END_center
+
+Here is another example with more movement between the two frames.
+#+BEGIN_CENTER
+#+ATTR_LaTeX: :height 0.2\textwidth :center
+[[./data/LF000.jpg]]
+#+ATTR_LaTeX: :height 0.2\textwidth :center
+[[./data/LF010.jpg]]
+#+END_CENTER
+
+#+BEGIN_center
+#+ATTR_LaTeX: :height 0.5\textwidth :center
+[[./results/F0_to_F10_pixelwise.png]]
+#+END_center
 
 ** Blocks approach
 
+The block approach was then implemented and tested using different size of blocks : 5, 10 and 20. The ray of search is 10. This can be controlled in the main.lisp by modifying the given constants.
+
+#+BEGIN_center
+#+ATTR_LaTeX: :height 0.5\textwidth :center
+[[./results/F0_to_F10_blocksize_5.png]]
+#+END_center
+
+#+BEGIN_center
+#+ATTR_LaTeX: :height 0.5\textwidth :center
+[[./results/F0_to_F10_blocksize_10.png]]
+#+END_center
+
+#+BEGIN_center
+#+ATTR_LaTeX: :height 0.5\textwidth :center
+[[./results/F0_to_F10_blocksize_15.png]]
+#+END_center
+
 ** Deductions
 
+It can be observed that using blocks tends to reduce noise and results in obtaining only "accurate" movement vectors. Larger is the block, lesser is the resulting noise. However, the pixel-wise approachs contains more little details about the motion.
+We can deduce that the choice of the size of blocks will depend of the frames we are working on. If we want to capture detailed motions, little or medium blocks could be a good choice. If we want to be fast and are working on regions with uniform motion, large blocks could be better.
+
+Maybe we could thinking about mixing block sizes. Like using large blocks to compute the regions with motion without capturing noise, and then applying little blocks on these regions.
+
 ** Regularization method
+
+To add regularization I added a method that add the value of each vector to the sum / average of its neighbors using a given alpha. If alpha is 0.6, the new value will be 0.6 of the actual value and 0.4 of the neighbors sum.
+
+This implementation results in adding smoothness to the result. Here are an example of the results between frame 0 and frane 10, without regularization and with it and an alpha of 0.6.
+
+#+BEGIN_CENTER
+#+ATTR_LaTeX: :height 0.3\textwidth :center
+[[./results/F0_to_F10_pixelwise.png]]
+#+ATTR_LaTeX: :height 0.3\textwidth :center
+[[./results/F0_to_F10_smooth_alpha_06.png]]
+#+END_CENTER
+
+Here are the results with alpha being 0, so by only taking the neighbors without the actual value. We can see that a lot of noise is suppressed.
+
+#+BEGIN_CENTER
+#+ATTR_LaTeX: :height 0.3\textwidth :center
+[[./results/F0_to_F10_pixelwise.png]]
+#+ATTR_LaTeX: :height 0.3\textwidth :center
+[[./results/F0_to_F10_smooth_alpha_00.png]]
+#+END_CENTER

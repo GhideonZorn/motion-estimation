@@ -57,10 +57,12 @@
       (plt:show)
       (plt:savefig savepath)))
 
-(defun display-block (u v x y width height)
+(defun display-block (u v x y width height savepath)
   (plt:subplots :figsize '(10 10))
   (plt:quiver x y u v :color "r" :angles "xy" :scale 1
                       :scale_units "xy" :linewidth 0.5)
   (plt:xlim 0 width)
   (plt:ylim height 0)
-  (plt:show))
+  (if (= (length savepath) 0)
+      (plt:show)
+      (plt:savefig savepath)))

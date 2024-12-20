@@ -21,21 +21,26 @@
     (display-pixel-wise u v ray (imago:image-width f1) (imago:image-height f2) savepath)))
 
 (pixel-wise-and-display "../data/LF015.jpg" "../data/LF016.jpg" 5)
-(pixel-wise-and-save "../data/LF015.jpg" "../data/LF016.jpg" 5 "../save.png")
+(pixel-wise-and-save "../data/LF015.jpg" "../data/LF016.jpg" 5 "../pixel-wise.png")
 
-;; A block is representend by a center, and a size
-(defparameter +block-size+ 10)
-(defparameter +block-search-ray+ 10)
+(defun bma-and-display (f1_path f2_path block-size block-search-ray)
+    (let ((f1 (imago:read-jpg f1_path))
+          (f2 (imago:read-jpg f2_path))
+          (u ()) (v ()) (x ()) (y ()))
+      (setf (values u v x y)
+            (decompose (bma-motion-vector f1 f2 10 10 block-size block-search-ray)))
+      (display-block u v x y (imago:image-width f1) (imago:image-height f1) "")))
 
-(setq +block-size+ 10)
-(setq +block-search-ray+ 10)
+(defun bma-and-save (f1_path f2_path block-size block-search-ray savepath)
+    (let ((f1 (imago:read-jpg f1_path))
+          (f2 (imago:read-jpg f2_path))
+          (u ()) (v ()) (x ()) (y ()))
+      (setf (values u v x y)
+            (decompose (bma-motion-vector f1 f2 10 10 block-size block-search-ray)))
+      (display-block u v x y (imago:image-width f1) (imago:image-height f1) savepath)))
 
-(defparameter u_block ())
-(defparameter v_block ())
-(defparameter x_block ())
-(defparameter y_block ())
-(setf (values u_block v_block x_block y_block)
-      (decompose (bma-motion-vector F1 F2 10 10 +block-size+ +block-search-ray+)))
+(bma-and-display "../data/LF015.jpg" "../data/LF016.jpg" 10 10)
+(bma-and-save "../data/LF015.jpg" "../data/LF016.jpg" 10 10 "../bma.png")
 
 (defun within-borns (size v)
   (if (and (> v 0) (< v size))
@@ -56,13 +61,3 @@
   (mapcar #'(lambda (pair) (compute-neighbors list (cdr pair) size width alpha))
         (mapcar #'(lambda (elm idx) (cons elm idx)) list
                 (loop for i from 0 to size collect i))))
-
-(setf (values u v) (pixel-wise-motion-vector F1 F2))
-
-;; Calls to change u and v using smoothness of motion vectors
-;; and a alpha argument
-(setf u (neighbors u (length u) (imago:image-width F1) 0.0))
-(setf v (neighbors v (length v) (imago:image-width F1) 0.0))
-
-;; Calls to display the resulfs for pixel wise and bma
-(display-block u_block v_block x_block y_block (imago:image-width F1) (imago:image-height F1))

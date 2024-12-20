@@ -4,11 +4,14 @@
 
 (load "hsl.lisp")
 
+;; Convert rgb pixel to hsl but only return luminosity
+;; component
 (defun luminosity (F x y)
   (let ((h 0) (s 0) (l 0))
     (setf (values h s l) (rgb-to-hsl (imago:image-pixel F x y)))
   l))
 
+;; Check if all the block fo block-size is inside F at x y
 (defun block-is-within-frame (F x y block-size)
   (if (and (>= (- x (floor block-size 2)) 0)
            (< (+ x (floor block-size 2)) (- (imago:image-width F) (floor block-size 2)))
@@ -17,6 +20,8 @@
       t
       nil))
 
+;; Sum luminosity of all pixels inside block of block-size at
+;; pos x y in frame F
 (defun block-luminosity (F x y block-size)
   (if (block-is-within-frame F x y block-size)
       (let ((sum 0))
@@ -27,10 +32,14 @@
         sum)
         -1000))
 
+;; Check if luminosity of checked block is nearest to l than
+;; the current saved one
 (defun check-block-at-pos (F l l_saved bx by block-size)
   (let ((l_found (block-luminosity F bx by block-size)))
     (get-nearest-luminosity l l_saved l_found)))
 
+;; Search for the block from F2 with the luminosity the nearest to the block
+;; from F1 at pos bx by
 (defun search-for-matching-blocks (F1 F2 bx by block-size block-search-ray)
   (let ((l (block-luminosity F1 bx by block-size))
         (l_saved 0)
@@ -58,6 +67,9 @@
         (y (mapcar #'(lambda (elm) (second (second elm))) list)))
     (values u v x y)))
 
+;; Recursive function that build a list containing elements as
+;; such (u v x y) where u and v are the motion-vector starting at
+;; point x y
 (defun bma-motion-vector (F1 F2 x y block-size block-search-ray)
   (when (> x (imago:image-width F1))
     (setf x 0)

@@ -6,26 +6,29 @@
 (load "display.lisp")
 (load "bma.lisp")
 
-;; FIXME: some variables used for testing, frame and resources
-;; path will be given as input to program
-(defvar data-path "../data/")
-(defvar F1 (imago:read-jpg (concatenate 'string data-path "LF000.jpg")))
-(defvar F2 (imago:read-jpg (concatenate 'string data-path "LF001.jpg")))
+(defun pixel-wise-and-display (f1_path f2_path ray)
+  (let ((f1 (imago:read-jpg f1_path))
+        (f2 (imago:read-jpg f2_path))
+        (u ()) (v ()))
+    (setf (values u v) (pixel-wise-motion-vector f1 f2 ray))
+    (display-pixel-wise u v ray (imago:image-width f1) (imago:image-height f2) "")))
 
-;; Size of the search for corresponding pixel
-;; from frame A to frame B
-(defvar +ray+ 5)
+(defun pixel-wise-and-save (f1_path f2_path ray savepath)
+  (let ((f1 (imago:read-jpg f1_path))
+        (f2 (imago:read-jpg f2_path))
+        (u ()) (v ()))
+    (setf (values u v) (pixel-wise-motion-vector f1 f2 ray))
+    (display-pixel-wise u v ray (imago:image-width f1) (imago:image-height f2) savepath)))
+
+(pixel-wise-and-display "../data/LF015.jpg" "../data/LF016.jpg" 5)
+(pixel-wise-and-save "../data/LF015.jpg" "../data/LF016.jpg" 5 "../save.png")
 
 ;; A block is representend by a center, and a size
-(defvar +block-size+ 10)
-(defvar +block-search-ray+ 10)
+(defparameter +block-size+ 10)
+(defparameter +block-search-ray+ 10)
 
 (setq +block-size+ 10)
 (setq +block-search-ray+ 10)
-
-(defparameter u ())
-(defparameter v ())
-(setf (values u v) (pixel-wise-motion-vector F1 F2))
 
 (defparameter u_block ())
 (defparameter v_block ())
@@ -39,8 +42,6 @@
     t
     nil))
 
-;; FIXME: merge the two compute-neighbors in one using function
-;; passed as parameter
 (defun compute-neighbors(list idx size width alpha)
   (let* ((neighbors (list -1 1 (- width) width))
          (sum (nth idx list))
@@ -64,5 +65,4 @@
 (setf v (neighbors v (length v) (imago:image-width F1) 0.0))
 
 ;; Calls to display the resulfs for pixel wise and bma
-(display u v 5 (imago:image-width F1) (imago:image-height F1))
 (display-block u_block v_block x_block y_block (imago:image-width F1) (imago:image-height F1))

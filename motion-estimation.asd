@@ -1,4 +1,4 @@
-(defsystem "motion-estimation"
+(asdf:defsystem "motion-estimation"
   :version "0.0.1"
   :author "Ghislain Bonnard"
   :license ""
@@ -14,7 +14,7 @@
   :description "TVID TP's implementation"
   :in-order-to ((test-op (test-op "motion-estimation/tests"))))
 
-(defsystem "motion-estimation/tests"
+(asdf:defsystem "motion-estimation/tests"
   :author ""
   :license ""
   :depends-on ("motion-estimation"

@@ -24,7 +24,7 @@
               (loop for i from 0 to (length list) collect i)))))
 
 (defun get-points-arrays (spacing width height)
-  (let ((x (np:arange 0 width)) (y (np:arange 0 height))
+"../data/LF015.jpg"  (let ((x (np:arange 0 width)) (y (np:arange 0 height))
         (bigx nil) (bigy nil) (tmp nil))
     (setf tmp (np:meshgrid x y))
     (setf bigx (aref tmp 0))
@@ -41,7 +41,7 @@
     (setf bigy (np:take bigy i_x)))
     (values bigx bigy)))
 
-(defun display (u v spacing width height)
+(defun display-pixel-wise (u v spacing width height savepath)
   (setf u (reduce-by-spacing u spacing width))
   (setf v (reduce-by-spacing v spacing width))
   (plt:subplots :figsize '(10 10))
@@ -53,7 +53,9 @@
                               :scale_units "xy" :linewidth 0.5))
   (plt:xlim 0 width)
   (plt:ylim height 0)
-  (plt:show))
+  (if (= (length savepath) 0)
+      (plt:show)
+      (plt:savefig savepath)))
 
 (defun display-block (u v x y width height)
   (plt:subplots :figsize '(10 10))
